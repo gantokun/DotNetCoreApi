@@ -10,9 +10,12 @@ namespace TodoApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public IHostingEnvironment AppHosting { get; }
+
+        public Startup(IConfiguration configuration, IHostingEnvironment appHost)
         {
             Configuration = configuration;
+            AppHosting = appHost;
         }
 
         public IConfiguration Configuration { get; }
@@ -20,8 +23,13 @@ namespace TodoApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<TodoContext>(opt =>
+                //opt.UseInMemoryDatabase("todos")
+                //opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
+                opt.UseSqlite($"Data Source={AppHosting.ContentRootPath}/todos.db") //Root path is necessary for IISExpress
+                );
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("todos"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
